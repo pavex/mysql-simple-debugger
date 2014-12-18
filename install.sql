@@ -4,15 +4,15 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
 
-DROP PROCEDURE IF EXISTS `debug_begin`;
+DROP PROCEDURE IF EXISTS `debug__enable`;
 DELIMITER //
-CREATE PROCEDURE `debug_begin`()
+CREATE PROCEDURE `debug__enable`()
 BEGIN
-	IF EXISTS (SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_NAME = 'debug' AND TABLE_SCHEMA = DATABASE()) THEN
-		DROP TABLE debug;
+	IF EXISTS (SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_NAME = 'debug__data' AND TABLE_SCHEMA = DATABASE()) THEN
+		DROP TABLE debug__data;
 	END IF;
 	 
-	CREATE TABLE debug (
+	CREATE TABLE debug__data (
 		msg VARCHAR(255),
 		var VARCHAR(255),
 		value VARCHAR(255))
@@ -21,35 +21,41 @@ END//
 DELIMITER ;
 
 
-DROP PROCEDURE IF EXISTS `debug_msg`;
+DROP PROCEDURE IF EXISTS `debug__msg`;
 DELIMITER //
-CREATE PROCEDURE `debug_msg`(IN `a_msg` varchar(255))
+CREATE PROCEDURE `debug__msg`(IN `$in_msg` varchar(255))
 BEGIN
-	IF EXISTS (SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_NAME = 'debug' AND TABLE_SCHEMA = DATABASE()) THEN
-		INSERT INTO debug (msg, var, value)	VALUES(a_msg, '', '');
+	IF EXISTS (SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_NAME = 'debug__data' AND TABLE_SCHEMA = DATABASE()) THEN
+		INSERT INTO debug__data (msg, var, value)	VALUES($in_msg, '', '');
 	END IF;
 END//
 DELIMITER ;
 
 
-DROP PROCEDURE IF EXISTS `debug_show`;
+DROP PROCEDURE IF EXISTS `debug__show`;
 DELIMITER //
-CREATE PROCEDURE `debug_show`()
+CREATE PROCEDURE `debug__show`()
 BEGIN
-	IF EXISTS (SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_NAME = 'debug' AND TABLE_SCHEMA = DATABASE()) THEN
-		SELECT * FROM debug;
-		DROP TABLE IF EXISTS debug;
+	IF EXISTS (SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_NAME = 'debug__data' AND TABLE_SCHEMA = DATABASE()) THEN
+
+		INSERT INTO debug__data
+		SELECT CONCAT('DEBUG ', (SELECT COUNT(*) FROM debug__data), ' record(s)'), '', '';
+
+		SELECT * FROM debug__data;
+		DROP TABLE IF EXISTS debug__data;
+		
+		SHOW WARNINGS;
 	END IF;
 END//
 DELIMITER ;
 
 
-DROP PROCEDURE IF EXISTS `debug_var`;
+DROP PROCEDURE IF EXISTS `debug__var`;
 DELIMITER //
-CREATE PROCEDURE `debug_var`(IN `a_var` varchar(255), IN `a_value` varchar(255))
+CREATE PROCEDURE `debug__var`(IN `$in_var` varchar(255), IN `$in_value` varchar(255))
 BEGIN
-	IF EXISTS (SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_NAME = 'debug' AND TABLE_SCHEMA = DATABASE()) THEN
-		INSERT INTO debug (msg, var, value)	VALUES('', a_var, a_value);
+	IF EXISTS (SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_NAME = 'debug__data' AND TABLE_SCHEMA = DATABASE()) THEN
+		INSERT INTO debug__data (msg, var, value)	VALUES('', $in_var, $in_value);
 	END IF;
 END//
 DELIMITER ;
